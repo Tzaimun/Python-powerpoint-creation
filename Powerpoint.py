@@ -1,25 +1,18 @@
 from pptx import Presentation
 import os
+import xlrd
 from pptx.util import Inches, Pt
-from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE
+from pptx.enum.text import MSO_VERTICAL_ANCHOR, MSO_AUTO_SIZE
 from pptx.dml.color import RGBColor
-from pptx.enum.dml import MSO_THEME_COLOR
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.dml import MSO_THEME_COLOR_INDEX
+
+from pptx.enum.text import PP_PARAGRAPH_ALIGNMENT
 import pandas as pd
 
 df_xlsx = pd.read_excel("D:/Upthrust/Frank/PoC Cookbook Automation/Excel/Volkswagen Cookbook Excel.xlsx")
 
-x = 0
-# the row
-y = 0
-# the column
-
-
-
-z = df_xlsx.iloc[x,y]
 
 prs = Presentation()
-
 title_slide_layout = prs.slide_layouts[0]
 slide = prs.slides.add_slide(title_slide_layout)
 title = slide.shapes.title
@@ -29,19 +22,15 @@ subtitle = slide.placeholders[1]
 title.text = "VW Cookbook"
 subtitle.text = "Growthmarketing"
 
-
-def main():
-
+# Voor uitleg van de x, y, i kijk onderaan
+def main(x, y, i):
 
     z = df_xlsx.iloc[x, y]
     normal_slide = prs.slide_layouts[5]
     slide_2 = prs.slides.add_slide(normal_slide)
     title = slide_2.shapes.title
 
-
     title.text = "Experiment 1: Search Campaign Per Model"
-
-
 
     for shape in slide_2.shapes:
         if not shape.has_text_frame:
@@ -52,8 +41,6 @@ def main():
 
     text_frame = shape.text_frame
     text_frame.clear()
-
-
 
     p = text_frame.paragraphs[0]
     run = p.add_run()
@@ -375,13 +362,30 @@ def main():
     x = x + 1
     y = 0
     z = str(df_xlsx.iloc[x,y])
-    main()
+    print(x, y, z)
+
+    # Dit is wat de loop (eigenlijk een recursieve functie, een functie die zichzelf aan blijft roepen) draaiend houdt. Je had dit eerder ook al, maar toen had je
+    # nog geen "limiet" ingebouwd waardoor het programma draaide totdat er een error was. Nu stopt het programma netjes zodra de variabele i 0 is
+    i -= 1
+    if i > 0:
+      main(x, y, i)
+
+
+# the row
+x = 0
+
+# the column
+y = 0
+
+# Als je python code schrijft, en je maakt een main() functie, wordt deze niet automatisch gedraait. De code hieronder is een code waarbij de main() function wordt gedraait als
+# de python code direct wordt gerunned. Reference: https://stackoverflow.com/questions/419163/what-does-if-name-main-do
+if __name__ == "__main__":
+  # Je moet x en y meegeven, aangezien dit local variables zijn. de i (hier 25) die meegegeven is hoevaak het programma draait.
+  main(x, y, 25)
 
 os.startfile("D:/Upthrust/Frank/PoC Cookbook Automation/Powerpoints/Test.pptx")
 
 
-y = y + 1
-
-z = df_xlsx.iloc[x,y]
-
-
+# Wat je nog zou kunnen doen is kritisch naar de code in main() kijken. Gebeuren er soms dingen die vaker herhaald worden, kunnen deze misschien in een functie
+# worden gezet, waardoor je minder code zou hebben? Een van de belangerijkste regels in code is dat als je hetzelfde vaker doet, je er waarschijnlijk een
+# aanroepbare functie/class/whatever van kan maken. Hierdoor krijg je ook geen bestanden van 400 regels die lastig te lezen zijn.
